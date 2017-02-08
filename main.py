@@ -71,7 +71,7 @@ class signup(BaseHandler):
         if have_error:
             self.render('signup-form.html', **params)
         else:
-            self.redirect("/welcome?username" + str(username))
+            self.redirect("/welcome?username=" + str(username))
 
 
 class welcome(BaseHandler):
@@ -84,4 +84,4 @@ class welcome(BaseHandler):
 
 
 app = webapp2.WSGIApplication([('/', signup),
-                               ('welcome', welcome)], debug=True)
+                               ('/welcome', welcome)], debug=True)
