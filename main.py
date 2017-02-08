@@ -6,16 +6,10 @@ import re
 import os
 import jinja2
 
-#from google.appengine.ext import db
-#from google.appengine.ext import webapp
-#from google.appengine.ext.webapp import template
-
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                 autoescape = True)
-
-
 
 
 class BaseHandler(webapp2.RequestHandler):
@@ -23,13 +17,12 @@ class BaseHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
-    def render_str(template, **params):
+    def render_str(self, template, **params):
         t = jinja_env.get_template(template)
         return t.render(params)
 
     def render(self, template, **kw):
-        self.write(self.render_str(template,**kw))
-
+        self.write(self.render_str(template, **kw))
 
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -38,7 +31,7 @@ def valid_username(username):
 
 PASSWORD_RE = re.compile(r"^.{3,20}$")
 def valid_password(password):
-    return password and PASSWORD.RE.match(password)
+    return password and PASSWORD_RE.match(password)
 
 EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
 def valid_email(email):
@@ -48,8 +41,7 @@ def valid_email(email):
 class signup(BaseHandler):
 
     def get(self):
-        #self.render("signup-form.html")
-        self.write("hello")
+        self.render("signup-form.html")
 
     def post(self):
         have_error = False
@@ -79,7 +71,7 @@ class signup(BaseHandler):
         if have_error:
             self.render('signup-form.html', **params)
         else:
-            self.redirect("/welcome?username" + username)
+            self.redirect("/welcome?username" + str(username))
 
 
 class welcome(BaseHandler):
@@ -88,7 +80,8 @@ class welcome(BaseHandler):
         if valid_username(username):
             self.render('welcome.html', username = username)
         else:
-            self.redirect('/signup')
+            self.redirect('signup')
 
-app = webapp2.WSGIApplication([('/signup', signup),
-                               ('/welcome', welcome)], debug=True)
+
+app = webapp2.WSGIApplication([('/', signup),
+                               ('welcome', welcome)], debug=True)
